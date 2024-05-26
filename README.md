@@ -1,3 +1,11 @@
+# Changes from original (so far)
+I wanted to make the pages a more continuous story, so this now will save the story as it generates new pages and it will carry on where it left off when the program is run 
+again.
+
+This should also allow you to just start a new story by renaming the book1 directory, but as I type this, I might not have hardened the new story part since I started the story I was working with.
+
+The following is from the original project that I forked from (the setup *should* be the same)
+--
 # storybook
 A program that uses generative models on a Raspberry Pi to create fantasy storybook pages on the Inky Impression e-ink display
 
