@@ -2,7 +2,11 @@
 I wanted to make the pages a more continuous story, so this now will save the story as it generates new pages and it will carry on where it left off when the program is run 
 again.
 
-This should also allow you to just start a new story by renaming the book1 directory, but as I type this, I might not have hardened the new story part since I started the story I was working with.
+This should also allow you to just start a new story by renaming the book1 directory. I just noticed you will have to `mkdir book1` for this to work properly. I will fix that as soon as possible.
+
+I normally run this nohup in the background, so this will now look for a stop file that will cause it waiting loop to stop the process.
+`touch stop`
+Just remember to delete that file before the next run or it will only generate a single page
 
 The following is from the original project that I forked from (the setup *should* be the same)
 --
