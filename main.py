@@ -30,12 +30,11 @@ You do not reply with the text in quotes, quotes are allowed just not around the
 You do not preface the reply with anything. 
 You do not explain your replies. '''.replace("\n","")
 
-OLLAMA_PROMPT = '''Create text from the page of an illustrated children\'s fantasy book. 
+OLLAMA_PROMPT = '''Create text from the {} page of an illustrated children\'s fantasy book. 
 This text should be around 20 words. If you desire, you can include a hero, monster, mythical 
 creature or artifact. You can choose a random mood or theme. Be creative.'''.replace("\n", "")
 
-STORY_PROMPT = '''Create the text for the next page. Given the following  
-page numbers and text of a illustrated children\'s fantasy book. '''.replace("\n","")
+STORY_PROMPT = '''Given the following page numbers and text of a illustrated children\'s fantasy book. '''.replace("\n","")
 
 HOME = os.path.expanduser("~")
 SD_LOCATION = HOME + '/OnnxStream/src/build/sd'
@@ -127,15 +126,14 @@ def convert(data):
 
 def generate_page():
     story = load_storybook(STORYBOOK)
-    #print(convert(story))
-    prompt = PERSONA + STORY_PROMPT + convert(story) + OLLAMA_PROMPT
-    #print(prompt)
+    page_type = "first" if not story else "next"
+    prefix = STORY_PROMPT if story else ""
+    prompt = PERSONA + prefix + convert(story) + OLLAMA_PROMPT.format(page_type)
     generated_text = get_story(prompt).replace("\n\n","\n")
     print(f'text: {generated_text}')
 
     page = "page_" + str(save_storybook(STORYBOOK, generated_text))
     temp_image = BOOK_DIR + page + "_image.png"
-    #return
     subprocess.run([SD_LOCATION, '--xl', '--turbo', '--rpi', '--models-path', SD_MODEL_PATH,\
                     '--prompt', SD_PROMPT+f'"{generated_text}"',\
                     '--steps', f'{SD_STEPS}', '--output', temp_image], check=False) 
@@ -154,6 +152,8 @@ def generate_page():
     display.show()
 
 def main():
+    if not os.path.exists(BOOK_DIR):
+        os.makedirs(BOOK_DIR)
     while True:
         generate_page()
         for _ in range(GENERATION_INTERVAL):
