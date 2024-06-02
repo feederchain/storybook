@@ -15,7 +15,7 @@ from config import load_config, get_llm
 
 display = auto()
 
-GENERATION_INTERVAL = 6 #seconds
+GENERATION_INTERVAL = 600 #seconds
 DISPLAY_RESOLUTION = (448, 600)
 TOTAL_LINES = 6
 
