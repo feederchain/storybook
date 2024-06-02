@@ -7,49 +7,21 @@ A program that generates storybook pages with Ollama and Stable Diffusion for th
 import os
 import json
 import math
-import requests
-import subprocess
 import time
 from PIL import Image, ImageDraw, ImageFont
 from inky.auto import auto
+from config import load_config, get_llm
+
 
 display = auto()
 
 GENERATION_INTERVAL = 6 #seconds
 DISPLAY_RESOLUTION = (448, 600)
 TOTAL_LINES = 6
-OLLAMA_API = 'http://localhost:11434/api/generate'
-OLLAMA_MODEL = 'llama3'
 
 BOOK_DIR = 'book1/'
 STORYBOOK = BOOK_DIR + 'storybook.json'
 CONFIG = 'config.json'
-
-HOME = os.path.expanduser("~")
-SD_LOCATION = HOME + '/OnnxStream/src/build/sd'
-SD_MODEL_PATH = HOME + '/sd_models/stable-diffusion-1.5-onnxstream'
-
-SD_STEPS = 3
-
-def get_story(prompt):
-    r = requests.post(OLLAMA_API, timeout=600,
-        json = {
-            'model': OLLAMA_MODEL,
-            'prompt': prompt,
-            'stream': False,
-            'options': {
-              'temperature': 1.0
-            }
-        })
-    data = r.json()
-    return data['response'].lstrip()
-
-
-def get_image(prompt, image_file):
-    subprocess.run([SD_LOCATION, '--xl', '--turbo', '--rpi', '--models-path', SD_MODEL_PATH,\
-                    '--prompt', prompt,\
-                    '--steps', f'{SD_STEPS}', '--output', image_file], check=False) 
-    return
 
 
 # warp text by adding a newline at the last space before the max_length,
@@ -74,12 +46,6 @@ def wrap_text(text, max_length=50):
     
     # Remove the last unnecessary newline added
     return final_text.strip()
-
-
-def load_config(config_file):
-    with open(config_file, 'r') as file:
-        config = json.load(file)
-    return config
 
 
 def load_storybook(file_path):
@@ -125,6 +91,7 @@ def convert(data):
 
 def generate_page():
     config = load_config(CONFIG)
+    llm = get_llm(config)
     PERSONA = config['PERSONA']
     LLM_PROMPT = config['LLM_PROMPT']
     STORY_PROMPT = config['STORY_PROMPT']
@@ -135,13 +102,13 @@ def generate_page():
     story = load_storybook(STORYBOOK)
     page_type = "first" if not story else "next"
     prefix = STORY_PROMPT if story else ""
-    prompt = PERSONA + prefix + convert(story) + LLM_PROMPT.format(page_type)
-    generated_text = get_story(prompt).replace("\n\n","\n")
+    prompt = prefix + convert(story) + LLM_PROMPT.format(page_type)
+    generated_text = llm.generate_text(PERSONA, prompt).replace("\n\n","\n")
     print(f'text: {generated_text}')
-
+    
     page = "page_" + str(save_storybook(STORYBOOK, generated_text))
     temp_image = BOOK_DIR + page + "_image.png"
-    get_image(IMAGE_PROMPT+f'"{generated_text}"', temp_image) 
+    llm.get_image(IMAGE_PROMPT+f'"{generated_text}"', temp_image) 
     generated_text = wrap_text(generated_text, 53)
     canvas = Image.new(mode="RGB", size=DISPLAY_RESOLUTION, color="white")
     im2 = Image.open(temp_image)
