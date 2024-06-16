@@ -4,13 +4,17 @@
 A program that generates storybook pages with Ollama and Stable Diffusion for the Inky Impression
 """
 
+import sys
 import os
 import json
 import math
 import time
+import signal
+import threading
 from PIL import Image, ImageDraw, ImageFont
 from inky.auto import auto
 from config import load_config, get_llm
+from gpiozero import Button
 
 
 display = auto()
@@ -22,6 +26,46 @@ TOTAL_LINES = 6
 BOOK_DIR = 'book1/'
 STORYBOOK = BOOK_DIR + 'storybook.json'
 CONFIG = 'config.json'
+
+# Gpio pins for each button (from top to bottom)
+BUTTONS = [5, 6, 16, 24]
+
+# These correspond to buttons A, B, C and D respectively
+LABELS = ['A', 'B', 'C', 'D']
+
+button_lock = threading.Lock()
+
+current_page = 0
+max_page = 0
+
+
+def handle_button(pin):
+    global current_page
+    if button_lock.locked():
+        return
+    
+    with button_lock:
+        label = LABELS[BUTTONS.index(pin.pin.number)]
+        print("Button press detected on pin: {} label: {}".format(pin.pin.number, label))
+        if label == 'A':
+            if current_page >= max_page:
+                generate_page()
+            elif current_page >= 1:
+                current_page += 1
+                load_page(current_page)
+        elif label == 'B':
+            os.kill(os.getpid(), signal.SIGUSR1)
+        elif label == 'C':
+            pass
+        elif label == 'D':
+            if current_page > 1:
+                current_page -= 1
+                load_page(current_page)
+
+
+for pin in BUTTONS:
+    button = Button(pin=pin, pull_up=True, bounce_time=0.250)
+    button.when_pressed = handle_button
 
 
 # warp text by adding a newline at the last space before the max_length,
@@ -49,10 +93,12 @@ def wrap_text(text, max_length=50):
 
 
 def load_storybook(file_path):
+    global current_page
     if os.path.isfile(file_path):
         with open(file_path, 'r') as file:
             try:
                 data = json.load(file)
+                current_page = max(entry["page_number"] for entry in data)
                 return data
             except json.JSONDecodeError:
                 return []
@@ -90,6 +136,7 @@ def convert(data):
 
 
 def generate_page():
+    global current_page, max_page
     config = load_config(CONFIG)
     llm = get_llm(config)
     PERSONA = config['PERSONA']
@@ -106,8 +153,10 @@ def generate_page():
     generated_text = llm.generate_text(PERSONA, prompt).replace("\n\n","\n")
     print(f'text: {generated_text}')
     
-    page = "page_" + str(save_storybook(STORYBOOK, generated_text))
-    temp_image = BOOK_DIR + page + "_image.png"
+    current_page = save_storybook(STORYBOOK, generated_text)
+    max_page = current_page
+    page_string = "page_" + str(current_page)
+    temp_image = BOOK_DIR + page_string + "_image.png"
     llm.get_image(IMAGE_PROMPT+f'"{generated_text}"', temp_image) 
     generated_text = wrap_text(generated_text, 53)
     canvas = Image.new(mode="RGB", size=DISPLAY_RESOLUTION, color="white")
@@ -117,22 +166,40 @@ def generate_page():
     im3 = ImageDraw.Draw(canvas)
     font = ImageFont.truetype(FONT_FILE, FONT_SIZE)
     im3.text((7, 450), generated_text, font=font, fill=(0, 0, 0))
-    canvas.show()
-    canvas.save(BOOK_DIR + page + '.png') # save a local copy for closer inspection
+    #canvas.show()
+    canvas.save(BOOK_DIR + page_string + '.png') # save a local copy for closer inspection
     canvas = canvas.rotate(90,expand=1)
     display.set_image(canvas)
     display.show()
 
+
+def load_page(page):
+    image = BOOK_DIR + "page_" + str(page) + '.png'
+    print(image)
+    canvas = Image.open(image)
+    canvas = canvas.rotate(90,expand=1)
+    
+    display.set_image(canvas)
+    display.show()
+
+
 def main():
+    global current_page, max_page
     if not os.path.exists(BOOK_DIR):
         os.makedirs(BOOK_DIR)
-    while True:
-        generate_page()
-        for _ in range(GENERATION_INTERVAL):
-            if os.path.isfile('stop'):
-                print("Stop file found. Exiting loop.")
-                return
-            time.sleep(1)  # Check for the stop file every second
+    
+    load_storybook(STORYBOOK)
+    if current_page > 0:
+        max_page = current_page
+        load_page(current_page)
+    signal.pause()
+#     while True:
+#         generate_page()
+#         for _ in range(GENERATION_INTERVAL):
+#             if os.path.isfile('stop'):
+#                 print("Stop file found. Exiting loop.")
+#                 return
+#             time.sleep(1)  # Check for the stop file every second
 
 if __name__ == '__main__':
     main()
