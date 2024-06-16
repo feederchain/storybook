@@ -4,9 +4,11 @@ again.
 
 This should also allow you to just start a new story by renaming the book1 directory.
 
-I normally run this nohup in the background, so this will now look for a stop file that will cause it's waiting loop to stop the process.
-`touch stop`
-Just remember to delete that file before the next run or it will only generate a single page
+You can use the buttons on the display to navigate through the saved story, or generate a new page.
+- A - Displays the next page. If there are no more pages, it generates a new page.
+- B - Stops the program
+- C - nothing
+- D - Displays the previous page.
 
 The following is from the original project that I forked from (the setup *should* be the same) There are a couple tweaks to support OpenAI and changes I made to the file structure
 --
@@ -34,6 +36,7 @@ A program that uses generative models on a Raspberry Pi to create fantasy storyb
 - Install the [Inky libraries](https://github.com/pimoroni/inky). Follow these instructions for RPi 5 compatibility: https://github.com/pimoroni/inky/pull/182
 - Install requests and pillow: `pip install requests pillow`
 - For OpenAI support: `pip install openai`
+- For button support: `pip install gpiozero lgpio`
 - Modify the constants (paths) in *_model.py and config.json to match your own environment.
 - execute main.py: `python main.py`. Execution takes ~5 minutes.
 
