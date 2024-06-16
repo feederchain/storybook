@@ -8,7 +8,7 @@ I normally run this nohup in the background, so this will now look for a stop fi
 `touch stop`
 Just remember to delete that file before the next run or it will only generate a single page
 
-The following is from the original project that I forked from (the setup *should* be the same)
+The following is from the original project that I forked from (the setup *should* be the same) There are a couple tweaks to support OpenAI and changes I made to the file structure
 --
 # storybook
 A program that uses generative models on a Raspberry Pi to create fantasy storybook pages on the Inky Impression e-ink display
@@ -33,7 +33,8 @@ A program that uses generative models on a Raspberry Pi to create fantasy storyb
 - Activate the environment: `source .venv/bin/activate`
 - Install the [Inky libraries](https://github.com/pimoroni/inky). Follow these instructions for RPi 5 compatibility: https://github.com/pimoroni/inky/pull/182
 - Install requests and pillow: `pip install requests pillow`
-- Modify the constants (paths) at the top of `main.py` to match your own environment.
+- For OpenAI support: `pip install openai`
+- Modify the constants (paths) in *_model.py and config.json to match your own environment.
 - execute main.py: `python main.py`. Execution takes ~5 minutes.
 
 ## ISSUES/IDEAS/TODO
