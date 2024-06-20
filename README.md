@@ -10,6 +10,8 @@ You can use the buttons on the display to navigate through the saved story, or g
 - C - nothing
 - D - Displays the previous page.
 
+I have tested this and it does also work with a Pi4 if you want to use OpenAI or some other cloud service to offload the llm and image generation.
+
 The following is from the original project that I forked from (the setup *should* be the same) There are a couple tweaks to support OpenAI and changes I made to the file structure
 --
 # storybook
