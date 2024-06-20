@@ -1,5 +1,6 @@
 {
   "llm_provider": "ollama",
+  "openai_api_key": "",
   "PERSONA": "You are a machine that generates text for children's books. You only generate text. You do not reply with the text in quotes, quotes are allowed just not around the reply. You do not preface the reply with anything. You do not explain your replies. ",
   "LLM_PROMPT": "Create text from the {} page of an illustrated children's fantasy book. This text should be around 20 words. If you desire, you can include a hero, monster, mythical creature or artifact. You can choose a random mood or theme. Be creative. ",
   "STORY_PROMPT": "Given the following page numbers and text of a illustrated children's fantasy book. ",
