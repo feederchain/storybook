@@ -13,7 +13,7 @@ import signal
 import threading
 from PIL import Image, ImageDraw, ImageFont
 from inky.auto import auto
-from config import load_config, get_llm
+from config import load_config, load_api_keys, get_llm
 from gpiozero import Button
 
 
@@ -26,6 +26,7 @@ TOTAL_LINES = 6
 BOOK_DIR = 'book1/'
 STORYBOOK = BOOK_DIR + 'storybook.json'
 CONFIG = 'config.json'
+KEYS = 'api_keys.json'
 
 # Gpio pins for each button (from top to bottom)
 BUTTONS = [5, 6, 16, 24]
@@ -138,7 +139,8 @@ def convert(data):
 def generate_page():
     global current_page, max_page
     config = load_config(CONFIG)
-    llm = get_llm(config)
+    api_keys = load_api_keys(KEYS)
+    llm = get_llm(config, api_keys)
     PERSONA = config['PERSONA']
     LLM_PROMPT = config['LLM_PROMPT']
     STORY_PROMPT = config['STORY_PROMPT']
