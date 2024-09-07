@@ -32,7 +32,7 @@ A program that uses generative models on a Raspberry Pi to create fantasy storyb
 - [Build/install XNNPACK and Onnxstream](https://github.com/vitoplantamura/OnnxStream?tab=readme-ov-file#how-to-build-the-stable-diffusion-example-on-linuxmacwindowstermux)
 - Download an SD model. I find that [Stable Diffusion XL Turbo 1.0
 ](https://github.com/vitoplantamura/OnnxStream?tab=readme-ov-file#stable-diffusion-xl-turbo-10) works well.
-- Clone this repository. `git clone https://github.com/tvldz/storybook.git`
+- Clone this repository. `git clone https://github.com/feederchain/storybook.git
 - Create a Python virtual environment: `cd storybook && mkdir .venv && python -m venv .venv`
 - Activate the environment: `source .venv/bin/activate`
 - Install the [Inky libraries](https://github.com/pimoroni/inky). Follow these instructions for RPi 5 compatibility: https://github.com/pimoroni/inky/pull/182
