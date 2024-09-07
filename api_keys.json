@@ -1,3 +1,4 @@
 {
-  "openai_api_key": ""
+  "openai_api_key": "",
+  "replicate_api_key": ""
 }
